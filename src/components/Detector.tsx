@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { analyzeBuffer } from "@/lib/detect/formats";
-import { detectWatermark } from "@/lib/detect/watermark";
+import { detectVideoWatermark, detectWatermark } from "@/lib/detect/watermark";
 import { buildReport, judge } from "@/lib/detect/verdict";
 import type { StoredReport, WatermarkResult } from "@/lib/detect/types";
 import ReportView from "./ReportView";
@@ -52,12 +52,14 @@ export default function Detector() {
       const buf = await file.arrayBuffer();
       const r = analyzeBuffer(buf, file.name, file.type, file.lastModified);
       let wm: WatermarkResult | null = null;
-      if (r.fmt === "JPEG" || r.fmt === "PNG" || r.fmt === "WebP") {
-        try {
+      try {
+        if (r.fmt === "JPEG" || r.fmt === "PNG" || r.fmt === "WebP") {
           wm = await detectWatermark(file);
-        } catch {
-          wm = { found: false, error: true };
+        } else if (r.fmt === "MP4") {
+          wm = await detectVideoWatermark(file);
         }
+      } catch {
+        wm = { found: false, error: true };
       }
       const v = judge(r, wm);
       return buildReport(r, v, wm, "内容标检 LabelCheck", "V2.1");
