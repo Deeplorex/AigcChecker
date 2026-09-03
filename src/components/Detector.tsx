@@ -291,24 +291,57 @@ export default function Detector() {
           <ReportView report={report} previewUrl={previewUrl} srcPath={srcPath}>
             <div className="mt-6 flex flex-wrap gap-3">
               <button
-                className="cursor-pointer rounded-full bg-[#1c2b3a] px-[22px] py-2.5 text-[13.5px] font-medium text-white transition-colors hover:bg-ink active:scale-[0.98]"
+                className="inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-[#1c2b3a] px-[22px] py-2.5 text-[13.5px] font-medium text-white transition-colors hover:bg-ink active:scale-[0.98]"
                 onClick={download}
               >
+                <svg
+                  className="h-[15px] w-[15px]"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  aria-hidden="true"
+                >
+                  <path d="M12 4v12m0 0l-4-4m4 4l4-4" />
+                  <path d="M4 15v3a2 2 0 002 2h12a2 2 0 002-2v-3" />
+                </svg>
                 {t("report.download")}
               </button>
               <button
-                className="cursor-pointer rounded-full border border-border-strong bg-transparent px-[22px] py-2.5 text-[13.5px] font-medium text-ink transition-colors hover:border-ink active:scale-[0.98] disabled:opacity-50"
+                className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-border-strong bg-transparent px-[22px] py-2.5 text-[13.5px] font-medium text-ink transition-colors hover:border-ink active:scale-[0.98] disabled:opacity-50"
                 onClick={share}
                 disabled={shareState === "working"}
               >
+                <svg
+                  className="h-[15px] w-[15px]"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  aria-hidden="true"
+                >
+                  <path d="M10 14a5 5 0 007.07 0l2.83-2.83a5 5 0 00-7.07-7.07L11.5 5.5" />
+                  <path d="M14 10a5 5 0 00-7.07 0l-2.83 2.83a5 5 0 007.07 7.07l1.4-1.4" />
+                </svg>
                 {shareState === "copied"
                   ? t("report.shareCopied")
                   : t("report.share")}
               </button>
               <button
-                className="cursor-pointer rounded-full border border-border-strong bg-transparent px-[22px] py-2.5 text-[13.5px] font-medium text-ink transition-colors hover:border-ink active:scale-[0.98]"
+                className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-border-strong bg-transparent px-[22px] py-2.5 text-[13.5px] font-medium text-ink transition-colors hover:border-ink active:scale-[0.98]"
                 onClick={reset}
               >
+                <svg
+                  className="h-[15px] w-[15px]"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  aria-hidden="true"
+                >
+                  <path d="M3 12a9 9 0 109-9 9.4 9.4 0 00-6.7 2.8L3 8" />
+                  <path d="M3 3v5h5" />
+                </svg>
                 {t("report.reset")}
               </button>
             </div>
