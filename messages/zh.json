@@ -31,7 +31,9 @@
     "phase2": "检测 C2PA 溯源凭证（caBX / JUMBF / uuid box）",
     "phase3": "匹配生成工具签名与 AI 来源信号",
     "phase4": "对照《标识办法》逐项判定",
-    "fileTooLarge": "文件超过 50 MB 限制"
+    "fileTooLarge": "文件超过 50 MB 限制",
+    "historyTitle": "检测历史（仅保存在本机）",
+    "historyClear": "清空"
   },
   "report": {
     "checksLabel": "合规检查项 · 三地法规对照",

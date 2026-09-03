@@ -6,6 +6,7 @@ import { analyzeBuffer } from "@/lib/detect/formats";
 import { detectVideoWatermark, detectWatermark } from "@/lib/detect/watermark";
 import { buildReport, judge } from "@/lib/detect/verdict";
 import type { StoredReport, WatermarkResult } from "@/lib/detect/types";
+import { clearHistory, loadHistory, saveReportToHistory } from "@/lib/history";
 import ReportView from "./ReportView";
 
 const MAX_SIZE = 50 * 1048576;
@@ -13,6 +14,12 @@ const PHASE_COUNT = 5;
 
 type Phase = "idle" | "scanning" | "done";
 type ShareState = "idle" | "working" | "copied" | "error";
+
+const LEVEL_DOT: Record<string, string> = {
+  pass: "bg-pass",
+  warn: "bg-warn",
+  fail: "bg-fail",
+};
 
 export default function Detector() {
   const t = useTranslations();
@@ -25,9 +32,16 @@ export default function Detector() {
   const [srcPath, setSrcPath] = useState("");
   const [shareState, setShareState] = useState<ShareState>("idle");
   const [fileError, setFileError] = useState<string | null>(null);
+  const [history, setHistory] = useState<StoredReport[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const reportRef = useRef<HTMLDivElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
+
+  // localStorage 仅客户端可用，挂载后再读取避免 hydration 不一致
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- 挂载后初始化本地历史的标准用法
+    setHistory(loadHistory());
+  }, []);
 
   // Nav「开始检测」按钮：已有报告时重置回空白检测框（每次渲染重挂以拿到最新闭包）
   useEffect(() => {
@@ -75,6 +89,8 @@ export default function Detector() {
       return buildReport(r, v, wm, "内容标检 LabelCheck", "V2.1");
     };
     const [, result] = await Promise.all([runPhases(), analyze()]);
+    saveReportToHistory(result);
+    setHistory(loadHistory());
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     setPreviewUrl(
       file.type.startsWith("image/") ? URL.createObjectURL(file) : null,
@@ -118,9 +134,8 @@ export default function Detector() {
     );
   }
 
-  function download() {
-    if (!report) return;
-    const blob = new Blob([JSON.stringify(report, null, 2)], {
+  function downloadReport(rep: StoredReport) {
+    const blob = new Blob([JSON.stringify(rep, null, 2)], {
       type: "application/json",
     });
     const a = document.createElement("a");
@@ -129,6 +144,11 @@ export default function Detector() {
     a.download = `label-check-report-${Date.now()}.json`;
     a.click();
     URL.revokeObjectURL(url);
+  }
+
+  function download() {
+    if (!report) return;
+    downloadReport(report);
   }
 
   async function share() {
@@ -225,6 +245,68 @@ export default function Detector() {
               className="border-t border-border bg-fail-bg px-7 py-3 text-[13px] text-fail"
             >
               {fileError}
+            </div>
+          ) : null}
+          {history.length > 0 ? (
+            <div className="border-t border-border px-7 py-4">
+              <div className="mb-1.5 flex items-center justify-between">
+                <h4 className="text-[12.5px] font-medium text-ink-mute">
+                  {t("tool.historyTitle")}
+                </h4>
+                <button
+                  className="cursor-pointer text-[12px] text-ink-mute transition-colors hover:text-fail"
+                  onClick={() => {
+                    clearHistory();
+                    setHistory([]);
+                  }}
+                >
+                  {t("tool.historyClear")}
+                </button>
+              </div>
+              <ul className="max-h-[210px] overflow-y-auto">
+                {history.map((h, i) => (
+                  <li key={`${h.time}-${i}`}>
+                    <button
+                      className="flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-[#f4f3ee]"
+                      onClick={() => downloadReport(h)}
+                      title={t("report.download")}
+                    >
+                      <span
+                        aria-hidden="true"
+                        className={`h-2 w-2 flex-none rounded-full ${LEVEL_DOT[h.verdict.level] ?? "bg-border-strong"}`}
+                      />
+                      <span className="min-w-0 flex-1 truncate text-[13px] text-ink">
+                        {h.file.name}
+                      </span>
+                      <span className="flex-none font-mono text-[11px] text-ink-soft">
+                        {h.file.format}
+                      </span>
+                      <span className="flex-none text-[11.5px] text-ink-mute">
+                        {new Date(h.time).toLocaleString(
+                          locale === "zh" ? "zh-CN" : "en-US",
+                          {
+                            month: "2-digit",
+                            day: "2-digit",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          },
+                        )}
+                      </span>
+                      <svg
+                        className="h-[14px] w-[14px] flex-none text-ink-mute"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        aria-hidden="true"
+                      >
+                        <path d="M12 4v12m0 0l-4-4m4 4l4-4" />
+                        <path d="M4 15v3a2 2 0 002 2h12a2 2 0 002-2v-3" />
+                      </svg>
+                    </button>
+                  </li>
+                ))}
+              </ul>
             </div>
           ) : null}
         </>

@@ -31,7 +31,9 @@
     "phase2": "Detecting C2PA provenance credentials (caBX / JUMBF / uuid box)",
     "phase3": "Matching generator signatures and AI origin signals",
     "phase4": "Checking item by item against the Labeling Measures",
-    "fileTooLarge": "File exceeds the 50 MB limit"
+    "fileTooLarge": "File exceeds the 50 MB limit",
+    "historyTitle": "History (stored on this device only)",
+    "historyClear": "Clear"
   },
   "report": {
     "checksLabel": "Compliance checks · three-jurisdiction mapping",
