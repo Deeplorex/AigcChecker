@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { analyzeBuffer } from "@/lib/detect/formats";
 import { detectVideoWatermark, detectWatermark } from "@/lib/detect/watermark";
@@ -27,6 +27,16 @@ export default function Detector() {
   const [fileError, setFileError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const reportRef = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  // Nav「开始检测」按钮：已有报告时重置回空白检测框（每次渲染重挂以拿到最新闭包）
+  useEffect(() => {
+    const onReset = () => {
+      if (phase === "done") reset();
+    };
+    window.addEventListener("labelcheck:reset", onReset);
+    return () => window.removeEventListener("labelcheck:reset", onReset);
+  });
 
   async function runPhases() {
     setPhase("scanning");
@@ -93,6 +103,19 @@ export default function Detector() {
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     setPreviewUrl(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
+    // 报告卸载后页面变矮，浏览器会把滚动位置钳到底部；
+    // 等 DOM 更新完再滚回检测区顶部（与检测完成后的定位逻辑一致）
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    setTimeout(
+      () =>
+        rootRef.current?.scrollIntoView({
+          behavior: reduceMotion ? "auto" : "smooth",
+          block: "start",
+        }),
+      50,
+    );
   }
 
   function download() {
@@ -129,7 +152,10 @@ export default function Detector() {
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-border-strong bg-surface shadow-[0_14px_40px_-18px_rgba(8,45,79,0.18)]">
+    <div
+      ref={rootRef}
+      className="scroll-mt-20 overflow-hidden rounded-lg border border-border-strong bg-surface shadow-[0_14px_40px_-18px_rgba(8,45,79,0.18)]"
+    >
       <div className="flex items-center justify-between border-b border-border px-5 py-3 font-mono text-[12.5px] text-ink-mute">
         <div className="flex gap-1.5" aria-hidden="true">
           <i className="block h-[9px] w-[9px] rounded-full border border-border-strong" />
@@ -243,7 +269,7 @@ export default function Detector() {
       ) : null}
 
       {phase === "done" && report ? (
-        <div ref={reportRef}>
+        <div ref={reportRef} className="scroll-mt-20">
           <div className="border-t border-border bg-[#fcfcfa] px-7 py-3.5">
             <label
               htmlFor="srcPath"

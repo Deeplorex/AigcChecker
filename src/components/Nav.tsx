@@ -1,3 +1,5 @@
+"use client";
+
 import { useTranslations } from "next-intl";
 import LanguageSwitcher from "./LanguageSwitcher";
 
@@ -114,6 +116,10 @@ export default function Nav() {
           </div>
           <a
             href="#tool"
+            onClick={() => {
+              // 已有报告时通知 Detector 重置回空白检测框（见 Detector 的监听）
+              window.dispatchEvent(new CustomEvent("labelcheck:reset"));
+            }}
             className="flex items-center gap-1.5 rounded-full bg-ink px-4 py-1.5 text-[13.5px] font-medium text-bg shadow-[0_1px_2px_rgba(8,45,79,0.35)] transition-[transform,box-shadow] duration-200 motion-safe:hover:-translate-y-px hover:shadow-[0_4px_10px_rgba(8,45,79,0.3)] [&>svg]:h-[15px] [&>svg]:w-[15px]"
           >
             <ScanIcon />
