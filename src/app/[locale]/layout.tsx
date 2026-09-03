@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { NextIntlClientProvider, hasLocale, useTranslations } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Inter, JetBrains_Mono } from "next/font/google";
+import Script from "next/script";
 import { routing } from "@/i18n/routing";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
@@ -55,6 +56,12 @@ export default async function LocaleLayout({
           {children}
           <Footer />
         </NextIntlClientProvider>
+        <Script
+          src="https://vibeloft.ai/telemetry/v1.js"
+          data-vl-product-id="9655a843-7975-449e-8ab6-58b5cfcbdec9"
+          data-vl-auth-key={process.env.NEXT_PUBLIC_VIBELOFT_AUTH_KEY}
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );

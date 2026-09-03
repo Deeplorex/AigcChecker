@@ -49,3 +49,4 @@ pnpm quality    # format:check + lint + typecheck + test + build（改动收尾�
 ## 环境变量
 
 - `DATABASE_URL`：Neon Postgres 连接串，放 `.env.local`（不提交）。未配置时分享 API 返回 503，检测功能不受影响。
+- `NEXT_PUBLIC_VIBELOFT_AUTH_KEY`：VibeLoft Web Telemetry 的 web auth key，输出到浏览器端（`src/app/[locale]/layout.tsx` 的 telemetry script）。本地放 `.env.local`，生产在 Vercel 环境变量中配置。
