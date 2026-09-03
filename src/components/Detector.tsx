@@ -207,14 +207,16 @@ export default function Detector() {
               {t("tool.dzHint")}
             </p>
             <div className="mt-4 inline-flex gap-2 font-mono text-[11px] text-ink-soft">
-              {["JPG", "PNG", "WebP", "MP4", "MOV"].map((f) => (
-                <em
-                  key={f}
-                  className="rounded border border-border bg-bg px-2 py-0.5 not-italic"
-                >
-                  {f}
-                </em>
-              ))}
+              {["JPG", "PNG", "WebP", "MP4", "MOV", "MP3", "WAV", "M4A"].map(
+                (f) => (
+                  <em
+                    key={f}
+                    className="rounded border border-border bg-bg px-2 py-0.5 not-italic"
+                  >
+                    {f}
+                  </em>
+                ),
+              )}
             </div>
           </label>
           {fileError ? (
@@ -232,7 +234,7 @@ export default function Detector() {
         type="file"
         id="fileInput"
         className="hidden"
-        accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime"
+        accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,audio/mpeg,audio/wav,audio/x-wav,audio/mp4,audio/x-m4a,audio/ogg,audio/flac,.mp3,.wav,.m4a,.ogg,.flac"
         onClick={(e) => {
           // 连续选择同一文件也能再次触发检测
           (e.target as HTMLInputElement).value = "";

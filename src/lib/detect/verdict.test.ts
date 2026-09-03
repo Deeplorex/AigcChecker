@@ -172,6 +172,13 @@ describe("judge · 单项规则", () => {
     );
   });
 
+  it("显式标识：音频格式走音频文案（内容不解析，提示人工试听）", () => {
+    const v = judge(base({ fmt: "MP3" }), null);
+    expect(v.checks.find((c) => c.key === "CN_EXPLICIT")?.detail.key).toBe(
+      "checks.CN_EXPLICIT.detail.failAudio",
+    );
+  });
+
   it("TRACE 为辅助项：jurisdictions 为空，仅文件名 hint → fnameHint 文案", () => {
     const v = judge(base({ fnameHint: true }), null);
     const trace = v.checks.find((c) => c.key === "TRACE");

@@ -128,6 +128,103 @@ describe("analyzeBuffer · JPEG", () => {
   });
 });
 
+describe("analyzeBuffer · 音频容器", () => {
+  it("RIFF/WAVE → WAV 并列出 chunk", () => {
+    const buf = new Uint8Array([
+      ...ascii("RIFF"),
+      0x24,
+      0,
+      0,
+      0,
+      ...ascii("WAVE"),
+      ...ascii("fmt "),
+      16,
+      0,
+      0,
+      0,
+      ...new Array(16).fill(0),
+      ...ascii("data"),
+      0,
+      0,
+      0,
+      0,
+    ]).buffer;
+    const r = analyzeBuffer(buf, "a.wav", "audio/wav", 0);
+    expect(r.fmt).toBe("WAV");
+    expect(r.chunks).toEqual(["fmt", "data"]);
+  });
+
+  it("ID3 头 → MP3 并记录 ID3v2 标签；裸帧同步头 → MP3", () => {
+    const id3 = analyzeBuffer(
+      new Uint8Array([...ascii("ID3"), 4, 0, 0, 0, 0, 0, 10]).buffer,
+      "a.mp3",
+      "audio/mpeg",
+      0,
+    );
+    expect(id3.fmt).toBe("MP3");
+    expect(id3.chunks).toEqual(["ID3v2.4"]);
+    expect(id3.meta.some((m) => m.field === "ID3v2 tag")).toBe(true);
+
+    const sync = analyzeBuffer(
+      new Uint8Array([0xff, 0xfb, 0x90, 0x00]).buffer,
+      "b.mp3",
+      "audio/mpeg",
+      0,
+    );
+    expect(sync.fmt).toBe("MP3");
+  });
+
+  it("ftyp 主品牌 M4A → M4A，复用 MP4 box 遍历", () => {
+    const buf = new Uint8Array([
+      0,
+      0,
+      0,
+      24,
+      ...ascii("ftyp"),
+      ...ascii("M4A "),
+      0,
+      0,
+      0,
+      0,
+      ...ascii("M4A mp42"),
+      0,
+      0,
+      0,
+      8,
+      ...ascii("free"),
+    ]).buffer;
+    const r = analyzeBuffer(buf, "a.m4a", "audio/mp4", 0);
+    expect(r.fmt).toBe("M4A");
+    expect(r.chunks).toEqual(["ftyp", "free"]);
+  });
+
+  it("OggS → OGG；fLaC → FLAC 并遍历元数据块", () => {
+    const ogg = analyzeBuffer(
+      new Uint8Array(ascii("OggS")).buffer,
+      "a.ogg",
+      "audio/ogg",
+      0,
+    );
+    expect(ogg.fmt).toBe("OGG");
+
+    const flac = analyzeBuffer(
+      new Uint8Array([
+        ...ascii("fLaC"),
+        0x80, // last 块 + type 0 STREAMINFO
+        0,
+        0,
+        34,
+        ...new Array(34).fill(0),
+      ]).buffer,
+      "a.flac",
+      "audio/flac",
+      0,
+    );
+    expect(flac.fmt).toBe("FLAC");
+    expect(flac.chunks).toEqual(["STREAMINFO"]);
+  });
+});
+
 describe("analyzeBuffer · 全文签名与兜底", () => {
   it("命中生成工具签名", () => {
     const buf = new Uint8Array([

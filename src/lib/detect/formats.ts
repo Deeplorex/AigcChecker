@@ -1,6 +1,8 @@
 /**
- * 容器级二进制解析：PNG chunks / JPEG APPn+EXIF / WebP RIFF / MP4 box，
+ * 容器级二进制解析：PNG chunks / JPEG APPn+EXIF / WebP RIFF / MP4 box /
+ * 音频容器（MP3 ID3 / WAV RIFF / M4A / OGG / FLAC），
  * C2PA 特征与生成工具签名扫描。纯函数，无 DOM 依赖，浏览器与 Node 均可运行。
+ * 音频仅做容器与元数据解析，不解码音频内容（显式语音/节奏标识走人工核对）。
  * 移植自 prototype/index.html（analyze / parseEXIF）。
  */
 
@@ -89,7 +91,16 @@ export function analyzeBuffer(
   else if (head.startsWith("\x89PNG")) r.fmt = "PNG";
   else if (head.startsWith("RIFF") && hex(view, 8, 4) === "WEBP")
     r.fmt = "WebP";
-  else if (hex(view, 4, 4) === "ftyp") r.fmt = "MP4";
+  else if (head.startsWith("RIFF") && hex(view, 8, 4) === "WAVE") r.fmt = "WAV";
+  else if (hex(view, 4, 4) === "ftyp")
+    r.fmt = /^M4[AB] /.test(hex(view, 8, 4)) ? "M4A" : "MP4";
+  else if (
+    head.startsWith("ID3") ||
+    (view.getUint8(0) === 0xff && (view.getUint8(1) & 0xe0) === 0xe0)
+  )
+    r.fmt = "MP3";
+  else if (head.startsWith("OggS")) r.fmt = "OGG";
+  else if (head.startsWith("fLaC")) r.fmt = "FLAC";
 
   /* --- PNG 块遍历 --- */
   if (r.fmt === "PNG") {
@@ -172,8 +183,8 @@ export function analyzeBuffer(
     }
   }
 
-  /* --- MP4 顶层 box 遍历 --- */
-  if (r.fmt === "MP4") {
+  /* --- MP4 顶层 box 遍历（M4A 同为 ISO-BMFF 容器） --- */
+  if (r.fmt === "MP4" || r.fmt === "M4A") {
     let off = 0;
     while (off + 8 <= view.byteLength && r.chunks.length < 40) {
       const size = view.getUint32(off, false);
@@ -191,6 +202,67 @@ export function analyzeBuffer(
       }
       if (size < 8) break;
       off += size;
+    }
+  }
+
+  /* --- WAV RIFF 遍历（与 WebP 同构） --- */
+  if (r.fmt === "WAV") {
+    let off = 12;
+    while (off + 8 <= view.byteLength) {
+      const cc = hex(view, off, 4);
+      const len = view.getUint32(off + 4, true);
+      r.chunks.push(cc.trim());
+      if (cc === "id3 " || cc === "ID3 ")
+        r.meta.push({
+          field: "ID3 chunk",
+          value: ref("detect.meta.presentBytes", { bytes: len }),
+        });
+      off += 8 + len + (len % 2);
+    }
+  }
+
+  /* --- MP3 ID3v2 头 --- */
+  if (r.fmt === "MP3" && head.startsWith("ID3")) {
+    // syncsafe 大小（每字节 7 位）
+    const size =
+      ((view.getUint8(6) & 0x7f) << 21) |
+      ((view.getUint8(7) & 0x7f) << 14) |
+      ((view.getUint8(8) & 0x7f) << 7) |
+      (view.getUint8(9) & 0x7f);
+    r.chunks.push(`ID3v2.${view.getUint8(3)}`);
+    r.meta.push({
+      field: "ID3v2 tag",
+      value: ref("detect.meta.presentBytes", { bytes: size }),
+    });
+  }
+
+  /* --- FLAC 元数据块遍历 --- */
+  if (r.fmt === "FLAC") {
+    const names: Record<number, string> = {
+      0: "STREAMINFO",
+      1: "PADDING",
+      2: "APPLICATION",
+      3: "SEEKTABLE",
+      4: "VORBIS_COMMENT",
+      5: "CUESHEET",
+      6: "PICTURE",
+    };
+    let off = 4;
+    while (off + 4 <= view.byteLength) {
+      const b = view.getUint8(off);
+      const type = b & 0x7f;
+      const len =
+        (view.getUint8(off + 1) << 16) |
+        (view.getUint8(off + 2) << 8) |
+        view.getUint8(off + 3);
+      r.chunks.push(names[type] ?? `BLOCK${type}`);
+      if (type === 4)
+        r.meta.push({
+          field: "Vorbis Comment",
+          value: ref("detect.meta.presentBytes", { bytes: len }),
+        });
+      off += 4 + len;
+      if (b & 0x80) break;
     }
   }
 

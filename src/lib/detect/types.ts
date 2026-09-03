@@ -22,7 +22,17 @@ export type SeverityLevel = "pass" | "warn" | "fail";
 /** 法域：中国 / 欧盟 / 美国加州。 */
 export type Jurisdiction = "CN" | "EU" | "US";
 
-export type FileFormat = "JPEG" | "PNG" | "WebP" | "MP4" | "unknown";
+export type FileFormat =
+  | "JPEG"
+  | "PNG"
+  | "WebP"
+  | "MP4"
+  | "MP3"
+  | "WAV"
+  | "M4A"
+  | "OGG"
+  | "FLAC"
+  | "unknown";
 
 export type C2paKind =
   | "pngCaBX"

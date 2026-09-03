@@ -111,6 +111,7 @@
         "found": "Pixel analysis detected a suspected visible watermark/text block in the {zone} area (edge density {density}). Confirm against the preview that it reads as an “AI-generated” notice and follows GB 45438-2025.",
         "failImg": "No visible watermark signature detected in corner regions. If an “AI-generated” notice appears elsewhere in the frame, confirm it manually; otherwise the explicit label is missing.",
         "failVideo": "Video must carry a clear AI notice on its opening frame or in the player UI — please verify manually against the content.",
+        "failAudio": "Audio must carry an “AI-generated” voice notice or Morse-code rhythm marker at the start, end, or middle (GB 45438-2025). Audio content is not analyzed yet — please listen and verify manually.",
         "failText": "Text content must carry an AI-generation notice in an appropriate position."
       },
       "fix": "If missing, add a visible label in the GB 45438-2025 style (see the standard text for exact parameters)."

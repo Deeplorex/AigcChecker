@@ -18,6 +18,12 @@ import {
 export function judge(r: FileAnalysis, wm: WatermarkResult | null): Verdict {
   const checks: VerdictCheck[] = [];
   const isImg = r.fmt === "JPEG" || r.fmt === "PNG" || r.fmt === "WebP";
+  const isAudio =
+    r.fmt === "MP3" ||
+    r.fmt === "WAV" ||
+    r.fmt === "M4A" ||
+    r.fmt === "OGG" ||
+    r.fmt === "FLAC";
   const aiPositive = r.c2pa || r.aiHints.length > 0;
   const wmFound = Boolean(wm && wm.found);
   // 隐式标识必须是指向 AI 来源的元数据，普通 EXIF（相机型号/拍摄时间）不计入
@@ -52,7 +58,9 @@ export function judge(r: FileAnalysis, wm: WatermarkResult | null): Verdict {
         ? ref("checks.CN_EXPLICIT.detail.failImg")
         : r.fmt === "MP4"
           ? ref("checks.CN_EXPLICIT.detail.failVideo")
-          : ref("checks.CN_EXPLICIT.detail.failText"),
+          : isAudio
+            ? ref("checks.CN_EXPLICIT.detail.failAudio")
+            : ref("checks.CN_EXPLICIT.detail.failText"),
     fix: wmFound ? undefined : ref("checks.CN_EXPLICIT.fix"),
   });
 
