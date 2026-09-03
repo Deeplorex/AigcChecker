@@ -1,0 +1,333 @@
+{
+  "nav": {
+    "wordmark": "LabelCheck",
+    "wordmarkSub": "AIGC LABEL CHECK",
+    "start": "Start Check",
+    "law": "Regulations",
+    "funnel": "Where Labels Get Lost",
+    "faq": "FAQ",
+    "skip": "Skip to main content"
+  },
+  "hero": {
+    "kicker": "Based on China’s AI-Generated Content Labeling Measures and companion national standards",
+    "titleLine1": "Is your AI-generated content",
+    "titleLine2": "label-compliant?",
+    "lede": "Upload an image or video to check explicit labels, implicit metadata, and C2PA provenance credentials item by item, with verdicts and fix guidance mapped to regulatory requirements. Files are parsed locally in your browser and never touch a server.",
+    "metaLaw": "In effect since",
+    "metaLawValue": "2025-09-01",
+    "metaDims": "Dimensions",
+    "metaDimsValue": "Explicit / Implicit / C2PA",
+    "metaData": "Data processing",
+    "metaDataValue": "100% local"
+  },
+  "tool": {
+    "head": "LabelCheck · Local Analysis · V2.0",
+    "dzTitle": "Click to choose or drop a file",
+    "dzHint": "Use the original downloaded file whenever possible — screenshots, forwarded or compressed copies carry no source metadata. Max 50 MB per file.",
+    "srcLabel": "Optional: paste the full path of this file on your computer for targeted diagnosis (text matching only; nothing is read from disk)",
+    "srcPlaceholder": "e.g. ~/.codex/generated_images/.../image.png or D:\\projects\\assets\\img.png",
+    "phase0": "Reading binary structure and identifying container format",
+    "phase1": "Parsing metadata blocks (PNG chunks / EXIF / XMP / RIFF / MP4 box)",
+    "phase2": "Detecting C2PA provenance credentials (caBX / JUMBF / uuid box)",
+    "phase3": "Matching generator signatures and AI origin signals",
+    "phase4": "Checking item by item against the Labeling Measures",
+    "fileTooLarge": "File exceeds the 50 MB limit"
+  },
+  "report": {
+    "checksLabel": "Compliance checks · three-jurisdiction mapping",
+    "auxLabel": "Supporting signals (not compliance items)",
+    "metaLabel": "Metadata findings",
+    "metaField": "Field",
+    "metaContent": "Value",
+    "metaNone": "No metadata fields could be parsed — the file has been “washed” (screenshot / forward / re-encode), which is itself direct evidence of a missing implicit label.",
+    "thumbAlt": "File preview",
+    "fileName": "File",
+    "fileSize": "Size",
+    "fileFormat": "Format",
+    "fileMtime": "Modified",
+    "download": "Download report (JSON)",
+    "share": "Create share link",
+    "shareCopied": "Link copied",
+    "shareFailed": "Sharing unavailable: {reason}",
+    "reset": "Check another file",
+    "privacyNote": "All parsing happens inside this browser; the file is never uploaded, stored, or transmitted. Keep the downloaded report as part of your evidence of having taken compliance measures.",
+    "badgePass": "COMPLIANT",
+    "badgeWarn": "PARTIAL",
+    "badgeFail": "NON-COMPLIANT",
+    "iconPass": "✓",
+    "iconWarn": "!",
+    "iconFail": "✕",
+    "fixPrefix": "Fix: ",
+    "generatorLabel": "Generator"
+  },
+  "aiNote": {
+    "body": "<b>“This is AI-generated — why wasn’t anything detected?”</b> This tool reads the labeling layer carried by the file, not the image content itself. If you are sure the content is AI-generated but no signal was found, the most common causes are: you did not test the original downloaded file (screenshots, saved previews, forwarded copies, and agent re-encodes carry no metadata), or the generator uses a pixel-level invisible watermark (such as SynthID) that only its official detector can read. <b>Either way, publishing this file as-is does not meet the implicit-label requirement.</b>",
+    "codex": "<b>Path diagnosis</b>: this file sits in Codex’s generated_images directory yet no C2PA was found — it may hit Codex’s known write-out defect (incomplete or stale file). Regenerate after upgrading Codex, or upload the current file to OpenAI Verify (openai.com/verify) to check for the pixel-level SynthID watermark.",
+    "reencoded": "<b>Path diagnosis</b>: this file sits in a project/work folder and is very likely an agent re-encoded copy of an inline chat image — re-encoding strips C2PA blocks. Go back to <code>~/.codex/generated_images/&lt;session-id&gt;/</code> for the original file and test that; if it is missing there too, use OpenAI Verify for the SynthID layer."
+  },
+  "verdict": {
+    "pass": {
+      "title": "Label structure complete, AI origin signals detected",
+      "sub": "Implicit metadata and a C2PA credential were found. Manually confirm the visible label against the preview, and keep this report as compliance evidence."
+    },
+    "warn": {
+      "title": "Partially compliant: metadata present, but credential or origin claim incomplete",
+      "sub": "Metadata traces were found, but the C2PA credential or AI origin claim is missing. For domestic publishing, manually confirm the required elements; for overseas distribution, add provenance credentials."
+    },
+    "fail": {
+      "title": "No machine-readable label present — publishing as-is is non-compliant",
+      "sub": "This file has no implicit labeling layer at all. Even if it is genuinely AI-generated (with metadata lost to screenshots/forwarding), publishing it in its current state does not satisfy the Labeling Measures."
+    }
+  },
+  "jurisdiction": {
+    "CN": {
+      "name": "China",
+      "law": "Labeling Measures · GB 45438-2025"
+    },
+    "EU": {
+      "name": "European Union",
+      "law": "AI Act Art. 50"
+    },
+    "US": {
+      "name": "California, US",
+      "law": "SB 942 (California AI Transparency Act)"
+    }
+  },
+  "checks": {
+    "CN_IMPLICIT": {
+      "title": "Implicit label (metadata)",
+      "requirement": "Labeling Measures Art. 5 · GB 45438-2025 Annex E",
+      "detail": {
+        "found": "AI-origin metadata detected: {signals}. Manually confirm it contains the required elements such as generator identity and content ID.",
+        "failWithMeta": "The file contains ordinary metadata (e.g. EXIF/XMP containers), but none of it points to AI generation. Under Article 5 of the Labeling Measures, an implicit label must be embedded in file metadata, covering content attributes, provider name or code, and content ID.",
+        "failNone": "No machine-readable implicit label found. Under the Labeling Measures, AI-generated content must carry generator identity, content ID and similar information in its file metadata."
+      },
+      "fix": "Write the implicit label in the final step before publishing; earlier compression and format conversion strip metadata, so re-verify after writing."
+    },
+    "CN_EXPLICIT": {
+      "title": "Explicit label (visible notice)",
+      "requirement": "Labeling Measures Art. 4 · GB 45438-2025 Ch. 5",
+      "detail": {
+        "found": "Pixel analysis detected a suspected visible watermark/text block in the {zone} area (edge density {density}). Confirm against the preview that it reads as an “AI-generated” notice and follows GB 45438-2025.",
+        "failImg": "No visible watermark signature detected in corner regions. If an “AI-generated” notice appears elsewhere in the frame, confirm it manually; otherwise the explicit label is missing.",
+        "failVideo": "Video must carry a clear AI notice on its opening frame or in the player UI — please verify manually against the content.",
+        "failText": "Text content must carry an AI-generation notice in an appropriate position."
+      },
+      "fix": "If missing, add a visible label in the GB 45438-2025 style (see the standard text for exact parameters)."
+    },
+    "EU_MACHINE_READABLE": {
+      "title": "Machine-readable marking",
+      "requirement": "EU AI Act Art. 50(2)",
+      "detail": {
+        "foundC2pa": "{kind}This credential satisfies Art. 50(2): synthetic content must be marked in a machine-readable way and detectable as artificially generated.",
+        "foundMeta": "AI-origin metadata detected: {signals}. Acceptable as a machine-readable marking, but a signed C2PA credential is recommended for stronger verifiability and robustness.",
+        "missing": "No machine-readable AI marking found (neither metadata nor C2PA). Art. 50(2) requires synthetic content to be marked in a machine-readable, detectable way."
+      },
+      "fix": "Embed a signed C2PA manifest or an equivalent metadata watermark; any subsequent compression/transcoding breaks the credential."
+    },
+    "EU_VISIBLE": {
+      "title": "Visible disclosure (deep fakes)",
+      "requirement": "EU AI Act Art. 50(4)",
+      "detail": {
+        "found": "A suspected visible label was detected. If it clearly states the content is artificially generated/manipulated, it can satisfy the Art. 50(4) deep-fake disclosure — confirm the wording manually.",
+        "missing": "No visible disclosure detected. If this content constitutes a deep fake (realistic generated or manipulated content), Art. 50(4) requires a visible disclosure at publish time."
+      }
+    },
+    "US_LATENT": {
+      "title": "Latent disclosure (provenance data)",
+      "requirement": "CA SB 942 · Latent Disclosure",
+      "detail": {
+        "foundC2pa": "{kind}This satisfies SB 942’s requirement to embed a latent disclosure in the content’s provenance data.",
+        "metaOnly": "AI-origin metadata detected: {signals}, but it is not a standardized provenance credential. SB 942 requires machine-readable, detectable provenance data (e.g. C2PA).",
+        "missing": "No embedded provenance data found. SB 942 requires covered AI-generated content to carry a latent disclosure in its provenance data."
+      },
+      "fix": "Embed a signed C2PA manifest as standardized provenance data; any subsequent compression/transcoding breaks the signature."
+    },
+    "US_VISIBLE": {
+      "title": "Visible disclosure",
+      "requirement": "CA SB 942 · Visible Disclosure",
+      "detail": {
+        "found": "A suspected visible label was detected. SB 942 requires generators to offer a visible-disclosure option; keeping it at publish time markedly reduces platform and enforcement risk.",
+        "missing": "No visible disclosure detected. Visible labeling is optional for users under SB 942, but a clear AI notice is recommended when distributing to California audiences."
+      }
+    },
+    "C2PA": {
+      "title": "C2PA provenance credential",
+      "code": "EU / California track",
+      "detail": {
+        "found": {
+          "pngCaBX": "Found: PNG caBX chunk (C2PA content credential), {bytes} bytes. C2PA is the mainstream machine-readable provenance standard in EU/US markets.",
+          "jpegJumbf": "Found: JPEG APP11 JUMBF segment (C2PA credential container). C2PA is the mainstream machine-readable provenance standard in EU/US markets.",
+          "mp4Uuid": "Found: C2PA manifest embedded in an MP4 uuid box. C2PA is the mainstream machine-readable provenance standard in EU/US markets.",
+          "mp4Box": "Found: top-level MP4 c2pa box. C2PA is the mainstream machine-readable provenance standard in EU/US markets.",
+          "jumbfFeature": "Found: JUMBF container with C2PA manifest signature. C2PA is the mainstream machine-readable provenance standard in EU/US markets.",
+          "claimFeature": "Found: C2PA claim signature string. C2PA is the mainstream machine-readable provenance standard in EU/US markets."
+        },
+        "missing": "No C2PA content credential found. Recommended for overseas distribution (EU AI Act, California SB 942)."
+      },
+      "fix": "Embed a signed C2PA manifest in the final step before publishing; any subsequent compression/transcoding breaks the signature."
+    },
+    "IMPLICIT": {
+      "title": "Implicit label (metadata)",
+      "code": "Required by the Labeling Measures",
+      "detail": {
+        "found": "AI-origin metadata detected: {signals}. Manually confirm it contains the required elements such as generator identity and content ID.",
+        "failWithMeta": "The file contains ordinary metadata (e.g. EXIF/XMP containers), but none of it points to AI generation. Under the Labeling Measures, generator identity, content ID and similar information must be written into the metadata.",
+        "failNone": "No machine-readable implicit label found. Under the Labeling Measures, AI-generated content must carry generator identity, content ID and similar information in its file metadata."
+      },
+      "fix": "Write the implicit label in the final step before publishing; earlier compression and format conversion strip metadata, so re-verify after writing."
+    },
+    "EXPLICIT": {
+      "title": "Explicit label (visible notice)",
+      "code": "Required by the Labeling Measures",
+      "detail": {
+        "found": "Pixel analysis detected a suspected visible watermark/text block in the {zone} area (edge density {density}). Confirm against the preview that it reads as an “AI-generated” notice and follows the national standard style.",
+        "failImg": "No visible watermark signature detected in corner regions. If an “AI-generated” notice appears elsewhere in the frame, confirm it manually; otherwise the explicit label is missing.",
+        "failVideo": "Video must carry a clear AI notice on its opening frame or in the player UI — please verify manually against the content.",
+        "failText": "Text content must carry an AI-generation notice in an appropriate position."
+      },
+      "fix": "If missing, add a visible label in the national-standard style (see the standard text for exact parameters)."
+    },
+    "TRACE": {
+      "title": "Generation origin signals",
+      "code": "Supporting signal · not a compliance item",
+      "requirement": "Supporting signal · not a compliance item",
+      "detail": {
+        "identified": "Generator identified: {generator}. The file is confirmed AI-generated and labeling obligations apply.",
+        "foundSignals": "AI origin signals detected: {signals} — the file is confirmed AI-generated and labeling obligations apply.",
+        "c2paOnly": "A C2PA credential is present but no specific generator signature was recognized.",
+        "fnameHint": "The file name matches AI-tool download patterns (a weak signal, not a compliance label), but no origin signature was found inside the file — metadata was most likely lost to screenshots/forwarding/compression.",
+        "none": "No known generator signature found. Note: no signal ≠ not AI-generated — screenshots, forwarding, and compression all strip these signals."
+      }
+    }
+  },
+  "detect": {
+    "implicit": {
+      "pngText": "PNG text chunk “{keyword}” (generation parameters)",
+      "creatorTool": "XMP CreatorTool field",
+      "iptcExt": "IPTC extension metadata"
+    },
+    "signal": {
+      "features": "features: {features}",
+      "xmpAi": "XMP segment with AI claim",
+      "c2pa": "C2PA credential",
+      "toolSig": "generator tool signature"
+    },
+    "zone": {
+      "corner": "corner",
+      "bottom": "bottom edge"
+    },
+    "meta": {
+      "presentBytes": "present ({bytes} bytes)"
+    },
+    "fmt": {
+      "mp4": "ISO-BMFF (MP4/MOV)",
+      "unknown": "Unknown"
+    },
+    "extra": {
+      "container": "Container structure",
+      "pngTexts": "PNG text chunks",
+      "xmpPresent": "XMP segment",
+      "xmpPresentValue": "present",
+      "wmScan": "Pixel-level watermark scan",
+      "wmFound": "suspected visible label found ({zone}, density {density})",
+      "wmNotFound": "no visible watermark signature found",
+      "implicitHits": "Matched features"
+    }
+  },
+  "law": {
+    "title": "What the regulation actually requires",
+    "p1": "The Measures for Labeling AI-Generated Synthetic Content, effective September 1, 2025, establish a dual-layer obligation of explicit + implicit labels: <b>both layers are mandatory</b>. A closing line like “written with AI assistance” only covers the explicit layer.",
+    "p2": "Responsibility sits at the publishing and distribution step — even if your generator adds its own watermark, once the label is missing or stripped at publish time, the compliance gap is yours.",
+    "listLabel": "Key provisions at a glance",
+    "items": {
+      "explicit": {
+        "tag": "Explicit label",
+        "title": "A user-perceivable notice",
+        "desc": "Image corner badges, video opening-frame notices, text disclaimers — placement and style must follow the national standard"
+      },
+      "implicit": {
+        "tag": "Implicit label",
+        "title": "Written into file metadata",
+        "desc": "Must include generator identity, content ID and more; compression, transcoding, and platform re-encoding can all strip it"
+      },
+      "distribution": {
+        "tag": "Distribution",
+        "title": "Platforms must verify and add labels",
+        "desc": "Platforms should add risk notices to unlabeled content; publishers have an active declaration duty"
+      },
+      "overseas": {
+        "tag": "EU / California",
+        "title": "A separate rulebook for overseas content",
+        "desc": "EU AI Act Article 50 watermarking duty (grace period ends December 2026); California SB 942 already in force"
+      }
+    }
+  },
+  "funnel": {
+    "title": "Where labels usually get lost",
+    "lede": "Labeled at generation ≠ compliant at publish. Every step between generation and publishing can lose the label — which is exactly why checking exists.",
+    "steps": {
+      "s1": {
+        "title": "Screenshots / saving preview images",
+        "desc": "A screenshot is a brand-new file: none of the original metadata (including the C2PA credential) carries over. This is the most common way labels are lost."
+      },
+      "s2": {
+        "title": "In-app saving and forwarding",
+        "desc": "Some AI tools’ in-app previews are processed copies; social platforms systematically strip metadata on upload. Always use the “download original” button."
+      },
+      "s3": {
+        "title": "Editing, compression, transcoding",
+        "desc": "Editor exports, format conversion, and re-compression rewrite the file structure — implicit metadata written earlier is often stripped wholesale at this step."
+      },
+      "s4": {
+        "title": "Where the duty lands at publish time",
+        "desc": "In practice, AI content with its label removed still publishes normally on most platforms — the system won’t stop you, but the responsibility remains yours."
+      }
+    }
+  },
+  "faq": {
+    "title": "FAQ",
+    "items": {
+      "q1": {
+        "q": "I generate images with Jimeng / Kling / Doubao, which add their own watermark. Do I still need to check?",
+        "a": "Yes. The platform watermark only covers the moment of generation. If you crop, edit, compress, export without the watermark, or distribute across platforms, the label may already be gone. This check answers “is it compliant right now, at publish time?”"
+      },
+      "q2": {
+        "q": "Why does an obviously ChatGPT/AI-generated image show no trace at all?",
+        "a": "Two possibilities. First, you may not be testing the original downloaded file: screenshots, saved in-app previews, and forwarded copies are all brand-new files without the original metadata — OpenAI itself confirms that in-app handling strips C2PA blocks. Use the chat UI’s “download” button and test that file instead. Second, since 2026 some vendors have switched to pixel-level invisible watermarks (e.g. SynthID), embedded in pixels rather than metadata and readable only by the vendor’s official detector. Note: no trace found does not mean it isn’t AI-generated — it only means this file currently carries no machine-readable label, and publishing it as-is is non-compliant."
+      },
+      "q3": {
+        "q": "Will a “non-compliant” result be recorded or reported?",
+        "a": "No. All parsing happens in your own browser: files are not uploaded and results are not retained. Downloaded reports stay on your device only."
+      },
+      "q4": {
+        "q": "What is the report actually useful for?",
+        "a": "Two things: pre-publish self-checks to avoid downranking and takedowns; and record-keeping — in a regulator or platform review, evidence of “having taken compliance verification measures” is key to mitigating liability."
+      },
+      "q5": {
+        "q": "Is the check equally deep for video and images?",
+        "a": "No. Images get full parsing of PNG/WebP metadata chunks, EXIF/XMP, and the C2PA manifest; video currently gets a container-level box scan plus C2PA signature matching. Visible labels (corner badges, opening-frame notices) require manual review against the picture, and the tool provides a checklist."
+      },
+      "q6": {
+        "q": "What should I do after a non-compliant result?",
+        "a": "Follow the fix guidance in the report: add a visible badge in the national-standard style, write implicit metadata in the final step before publishing, and embed a C2PA provenance credential for overseas-bound content. Batch processing will arrive in a later version."
+      }
+    }
+  },
+  "shared": {
+    "title": "Shared check report",
+    "note": "This report was generated locally by LabelCheck and shared by its author. It reflects the file’s labeling state at the time of the check.",
+    "notFound": "Report not found, or the link is invalid.",
+    "backHome": "Back to home — check my file"
+  },
+  "footer": {
+    "disclaimer": "results are for reference only and do not constitute legal advice",
+    "meta": "LABELCHECK · LOCAL-FIRST · V2.0",
+    "company": "Deeplorex",
+    "icp": "湘ICP备2026024031号-2"
+  },
+  "metadata": {
+    "title": "LabelCheck · AI content labeling compliance check",
+    "description": "Upload an image or video to check whether its AI-generation labels meet China’s Measures for Labeling AI-Generated Synthetic Content. Parsed locally — files are never uploaded."
+  }
+}

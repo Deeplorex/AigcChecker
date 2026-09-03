@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "project": {
+    "name": "aigcchecker",
+    "displayName": "内容标检 LabelCheck",
+    "packageScope": null,
+    "description": "AI 内容标识合规检测工具：本地解析显式/隐式标识与 C2PA 凭证，对照中国《标识办法》、欧盟 AI Act 与加州 SB 942 三地法规逐项判定（每项标注所属法域与条文引用），支持中英双语与报告分享。"
+  },
+  "product": {
+    "phase": "layer1-verify",
+    "sourceOfTruth": ["docs/product.md"],
+    "locales": ["zh", "en"],
+    "defaultLocale": "zh"
+  },
+  "architecture": {
+    "selectionStatus": "selected",
+    "selectionMode": "user-approved",
+    "selectedOption": "nextjs-app-router + vercel-serverless-api + managed-postgres",
+    "consideredOptions": [
+      {
+        "option": "pure-client-static",
+        "fit": "最小足够：检测全部本地完成，无 DB 无 API，交付最快零服务成本；报告分享用 URL 编码",
+        "rejected": "分享报告链接需持久化，且为后续嵌入工具等后端能力预留"
+      },
+      {
+        "option": "nextjs-app-router + vercel-serverless-api + managed-postgres",
+        "fit": "单一可部署应用；检测仍全在浏览器，Postgres 仅存报告载荷；serverless API 为后续后端能力预留",
+        "selected": true
+      }
+    ],
+    "components": {
+      "runtime": { "node": "24.x", "language": "typescript-5.9" },
+      "web": {
+        "framework": "next-16.3.4",
+        "react": "19.2.8",
+        "styling": "tailwindcss-4.3.3",
+        "i18n": "next-intl-4.14.2"
+      },
+      "data": {
+        "primary": "neon-postgres-serverless",
+        "orm": "none",
+        "client": "@neondatabase/serverless-1.1.0"
+      },
+      "auth": { "enabled": false },
+      "async": { "enabled": false },
+      "storage": { "enabled": false },
+      "search": { "enabled": false },
+      "analytics": { "enabled": false }
+    },
+    "apps": { "web": true, "worker": false, "admin": false }
+  },
+  "deployment": {
+    "selectionStatus": "selected",
+    "mode": "managed-serverless",
+    "provider": "vercel",
+    "plan": "hobby",
+    "environments": ["production"],
+    "knownLimits": [
+      "Hobby 套餐有条款与配额限制，触及前需升级 Pro",
+      "函数执行时长与流量受 Hobby 配额限制"
+    ]
+  },
+  "quality": {
+    "ci": "github-actions: pnpm quality（push/PR）+ PR 逐条 commitlint",
+    "hooks": "husky: pre-commit=lint-staged(prettier+eslint), commit-msg=commitlint(conventional)",
+    "integration": "deferred",
+    "e2e": "deferred",
+    "crossBrowser": "deferred",
+    "accessibility": "deferred",
+    "visual": "deferred"
+  },
+  "decisions": [
+    {
+      "id": "ADR-001",
+      "status": "accepted",
+      "classification": "user-selected",
+      "decision": "Next.js App Router 单应用 + Vercel serverless API + Neon Postgres；检测逻辑全部在浏览器本地运行，数据库仅用于分享报告持久化",
+      "reason": "在纯客户端静态方案与带后端方案之间选择后者，为报告分享链接与后续后端能力预留",
+      "revisitWhen": "嵌入工具（Stamp）或账户体系启动时重估后端边界；流量或函数时长触及 Hobby 限制时升级或拆分"
+    },
+    {
+      "id": "ADR-002",
+      "status": "accepted",
+      "classification": "user-selected",
+      "decision": "部署到 Vercel Hobby 套餐，知晓其条款与配额限制",
+      "reason": "验证期成本为零，部署最快",
+      "revisitWhen": "触及 Hobby 条款或配额限制前，升级 Vercel Pro"
+    },
+    {
+      "id": "ADR-003",
+      "status": "accepted",
+      "classification": "ai-recommended",
+      "decision": "分享报告无鉴权、知道链接即可访问；POST 仅做 64KB 大小限制与最小结构校验",
+      "reason": "报告内容敏感度低（文件名+检测结果），追求分享零摩擦",
+      "revisitWhen": "出现滥用、报告含敏感信息或账户体系上线时，加鉴权与限流"
+    }
+  ]
+}
