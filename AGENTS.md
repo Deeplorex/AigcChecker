@@ -29,7 +29,7 @@ pnpm quality    # format:check + lint + typecheck + test + build（改动收尾�
 
 ## 结构与约定
 
-- `src/lib/detect/`：检测引擎，纯函数、无 DOM 依赖（`watermark.ts` 除外，仅客户端）。面向用户的文案一律输出 `MsgRef`（i18n key + values），不硬编码任何语言。判定按三地法域（CN《标识办法》/ EU AI Act / US 加州 SB 942）逐项输出：每个 `VerdictCheck` 带 `jurisdictions` 与 `requirement`（条文引用），`verdict.byJurisdiction` 给各法域独立级别；总体级别仍由中国判定驱动。旧分享报告无 `byJurisdiction`，`ReportView` 走扁平渲染兼容路径（旧 `checks.C2PA/IMPLICIT/EXPLICIT` 文案 key 因此保留）。
+- `src/lib/detect/`：检测引擎，纯函数、无 DOM 依赖（`watermark.ts` 除外，仅客户端）。面向用户的文案一律输出 `MsgRef`（i18n key + values），不硬编码任何语言。判定按三地法域（CN《标识办法》/ EU AI Act / US 加州 SB 942）逐项输出：每个 `VerdictCheck` 带 `jurisdictions` 与 `requirement`（条文引用），`verdict.byJurisdiction` 给各法域独立级别；总体级别仍由中国判定驱动。旧分享报告无 `byJurisdiction`，`ReportView` 走扁平渲染兼容路径（旧 `checks.C2PA/IMPLICIT/EXPLICIT` 文案 key 因此保留）。`watermark.ts` 负责显式水印：图片直接扫描、视频抽帧（10%/50%/90% 时长）扫描，命中即判存在（归属方识别待后续迭代）。
 - `messages/zh.json` / `messages/en.json`：全部 UI 与判定文案，两语言 key 必须一一对应。
 - `src/app/[locale]/`：zh 无 URL 前缀，en 用 `/en` 前缀（`localePrefix: "as-needed"`）。中间件按浏览器 `Accept-Language` 自动选择语言（`localeDetection`），英文访客访问 `/` 会被 307 到 `/en`；手动切换后以 `NEXT_LOCALE` cookie 为准。
 - `src/app/api/reports/`：报告分享 API；`db/migrations/` 为手写 SQL 迁移。
